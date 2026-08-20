@@ -4,5 +4,75 @@
 
 html,
 body {
-  font-family: "Nunito", sans-serif;
+  font-family: "Nunito", sans-serif
+}
+
+.modal-backdrop {
+  @apply fixed inset-0 z-[1000] flex items-center justify-center bg-black/50
+}
+
+.modal {
+  @apply w-[min(500px,calc(100%-2rem))] rounded-lg bg-white p-8 shadow-[0_10px_30px_rgb(0_0_0/20%)]
+}
+
+.action-btn {
+  @apply w-full rounded-md py-1
+}
+
+.form-item {
+  @apply flex flex-col gap-1
+}
+
+.form-label {
+  @apply text-sm text-slate-700 font-semibold
+}
+
+.form-input {
+  @apply w-full rounded-md border border-slate-300 h-9 focus:outline-none focus:ring focus:ring-slate-200 focus:border-slate-500
+  text-sm px-2
+}
+
+.form-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.form-input[type="number"]::-webkit-outer-spin-button,
+.form-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.range-slider {
+  @apply relative h-5 flex items-center
+}
+
+.range-slider__track {
+  @apply absolute inset-x-0 h-1.5 rounded-full bg-slate-200
+}
+
+.range-slider__fill {
+  @apply absolute h-1.5 rounded-full bg-blue-500
+}
+
+.range-slider__input {
+  @apply absolute inset-x-0 w-full m-0 appearance-none bg-transparent pointer-events-none
+}
+
+.range-slider__input::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+.range-slider__input::-moz-range-track {
+  background: transparent;
+}
+
+.range-slider__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  @apply w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow pointer-events-auto cursor-pointer
+}
+
+.range-slider__input::-moz-range-thumb {
+  @apply w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow pointer-events-auto cursor-pointer
 }

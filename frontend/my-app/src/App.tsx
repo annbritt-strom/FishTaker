@@ -2,17 +2,21 @@ import { useState, useEffect } from "react"
 import { getTanks, getMaintenanceStatus } from "./assets/api"
 import type { Tank, MaintenanceStatusEntry } from "./assets/types"
 import Header from "./components/Header"
-import TankCard from "./components/tankCard"
+import TankCard from "./components/TankCard"
 import TanksSection from "./components/TanksSection"
 
 function App() {
   const [tanks, setTanks] = useState<Tank[]>([])
   const [status, setStatus] = useState<MaintenanceStatusEntry[]>([])
 
-  useEffect(() => {
+  const refreshTanks = () => {
     getTanks().then((data) => {
       setTanks(data)
     })
+  }
+
+  useEffect(() => {
+    refreshTanks()
     getMaintenanceStatus().then((data) => {
       setStatus(data)
     })
@@ -23,7 +27,7 @@ function App() {
       <Header />
 
       <div>
-        <TanksSection />
+        <TanksSection onTankAdded={refreshTanks} />
       </div>
 
       <div className='grid gap-4 px-32'>

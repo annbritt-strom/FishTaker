@@ -4,10 +4,9 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from database import Base, SessionLocal, engine, get_db
+from database import Base, engine, get_db
 from db_models import InhabitantORM, MaintenanceTaskORM, TankORM
 from models import MaintenanceTask, Tank, TankCreate
-from seed import seed_if_empty
 
 app = FastAPI(title="Fishtaker API")
 
@@ -23,11 +22,6 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
-    try:
-        seed_if_empty(db)
-    finally:
-        db.close()
 
 
 @app.get("/")

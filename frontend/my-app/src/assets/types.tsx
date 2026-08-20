@@ -11,6 +11,16 @@ export type Tank = {
     planted: boolean
 }
 
+export type TankCreate = {
+    name: string
+    size?: string
+    liter_capacity: number
+    water_type: WaterType
+    temp_min?: number | null
+    temp_max?: number | null
+    planted: boolean
+}
+
 export type MaintenanceStatus = "overdue" | "due_soon" | "on_track"
 
 export type MaintenanceStatusEntry = {

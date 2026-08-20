@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { getTanks, getMaintenanceStatus } from "./assets/api"
 import type { Tank, MaintenanceStatusEntry } from "./assets/types"
-import { FishIcon } from "./assets/icons"
+import Header from "./components/Header"
 import TankCard from "./components/tankCard"
+import TanksSection from "./components/TanksSection"
 
 function App() {
   const [tanks, setTanks] = useState<Tank[]>([])
@@ -18,11 +19,12 @@ function App() {
   }, [])
 
   return (
-    <>
-      <header className="flex items-center gap-2 p-4">
-        <FishIcon size={32} className="bg-blue-500 text-white rounded-full" />
-        <h1 className="text-xl font-bold">Aquarium Manager</h1>
-      </header>
+    <div className='min-h-screen bg-slate-100'>
+      <Header />
+
+      <div>
+        <TanksSection />
+      </div>
 
       <div className='grid gap-4 px-32'>
         {tanks.map((tank) => (
@@ -34,7 +36,7 @@ function App() {
           </div>
         ))}
       </div>
-    </>
+    </div>
   )
 }
 

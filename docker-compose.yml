@@ -1,0 +1,12 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: sqlite:////data/fishtaker.db
+    volumes:
+      - fishtaker-db:/data
+
+volumes:
+  fishtaker-db:

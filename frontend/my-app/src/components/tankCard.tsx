@@ -1,6 +1,7 @@
 import type { MaintenanceStatus, MaintenanceStatusEntry, Tank } from '../assets/types'
 import { EditIcon } from '../assets/icons'
 import StatusBadge from './StatusBadge'
+import { DetailedFishIcon, PlantIcon, ThermometerIcon } from '../assets/icons'
 
 type TankCardProps = {
     tank: Tank,
@@ -37,8 +38,14 @@ const waterVisualClass: Record<Tank['water_type'], string> = {
   saltwater: 'from-cyan-200 via-teal-100 to-sky-50',
 }
 
+const COOL_WARM_THRESHOLD = 22
+
 const TankCard = ({ tank, statuses = [], onEdit }: TankCardProps) => {
   const hasTempRange = tank.temp_min != null || tank.temp_max != null
+  const avgTemp = tank.temp_min != null && tank.temp_max != null
+    ? (tank.temp_min + tank.temp_max) / 2
+    : tank.temp_min ?? tank.temp_max
+  const tempIconClassName = avgTemp != null && avgTemp > COOL_WARM_THRESHOLD ? 'text-red-400' : 'text-blue-400'
   const fishCount = (tank.inhabitants ?? []).reduce((sum, inhabitant) => sum + inhabitant.amount, 0)
   const status = overallStatus(statuses)
   const nextTask = nextMaintenance(statuses)
@@ -92,14 +99,14 @@ const TankCard = ({ tank, statuses = [], onEdit }: TankCardProps) => {
           </span>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
-          <span className="inline-flex items-center gap-1">🐟 {fishCount} Fish</span>
+        <div className="mt-3  flex flex-wrap justify-between gap-y-1 text-sm text-slate-600">
+          <span className="inline-flex items-center gap-1"><DetailedFishIcon size={14} className="mr-1 text-orange-400" /> {fishCount} Fish</span>
           {hasTempRange && (
             <span className="inline-flex items-center gap-1">
-              🌡 {tank.temp_min ?? '?'}–{tank.temp_max ?? '?'}°C
+              <ThermometerIcon size={14} className={`mr-1 ${tempIconClassName}`} /> {tank.temp_min ?? '?'}–{tank.temp_max ?? '?'}°C
             </span>
           )}
-          <span className="inline-flex items-center gap-1">🌱 {tank.planted ? 'Planted' : 'Unplanted'}</span>
+          <span className="inline-flex items-center gap-1"><PlantIcon size={14} className={`mr-1 ${tank.planted ? 'text-green-400' : 'text-slate-300'}`} /> {tank.planted ? 'Planted' : 'Unplanted'}</span>
         </div>
 
         <div className="mt-4 border-t border-slate-100 pt-3">

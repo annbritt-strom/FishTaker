@@ -1,4 +1,5 @@
 import AquariumIllustration from "./AquariumIllustration"
+import { DetailedFishIcon, ToolBoxIcon, DropletsIcon, AddIcon } from "../assets/icons"
 
 type EmptyTanksStateProps = {
   onCreateTank: () => void
@@ -6,17 +7,17 @@ type EmptyTanksStateProps = {
 
 const features = [
   {
-    emoji: "🐟",
+    emoji: <DetailedFishIcon className="text-orange-400 pb-1" />,
     title: "Add fish",
     description: "Keep track of the fish in your aquarium.",
   },
   {
-    emoji: "💧",
+    emoji: <DropletsIcon className="text-sky-400 pb-1" />,
     title: "Track water",
     description: "Monitor important water parameters.",
   },
   {
-    emoji: "🧹",
+    emoji: <ToolBoxIcon className="text-green-400 pb-1" />  ,
     title: "Maintenance",
     description: "Stay on top of water changes and aquarium maintenance.",
   },
@@ -39,15 +40,15 @@ const EmptyTanksState = ({ onCreateTank }: EmptyTanksStateProps) => {
           Your aquarium awaits
         </h3>
         <p className="mt-2 max-w-md text-sm text-slate-500 sm:text-base">
-          Create your first tank and start keeping track of your fish, water parameters,
+          Start keeping track of your fish, water parameters,
           equipment, and maintenance.
         </p>
 
         <button
           onClick={onCreateTank}
-          className="mt-6 rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-orange-600"
+          className="hover:cursor-pointer flex items-center mt-6 rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-orange-600"
         >
-          + Create your first tank
+          <AddIcon size={14} className="mr-2" /> Create your first tank
         </button>
 
         <div className="mt-12 grid w-full max-w-2xl grid-cols-1 gap-6 border-t border-slate-100 pt-8 sm:grid-cols-3">

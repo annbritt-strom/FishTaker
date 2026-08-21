@@ -12,7 +12,7 @@ body {
 }
 
 .modal {
-  @apply w-[min(500px,calc(100%-2rem))] rounded-lg bg-white p-8 shadow-[0_10px_30px_rgb(0_0_0/20%)]
+  @apply w-[min(500px,calc(100%-2rem))] max-h-[calc(100vh-4rem)] overflow-y-auto rounded-lg bg-white p-8 shadow-[0_10px_30px_rgb(0_0_0/20%)]
 }
 
 .action-btn {

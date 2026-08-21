@@ -1,7 +1,7 @@
 [X] 1. Implement a db using SQL lite
     make it easy to empty the data and rebuild the db when changes using shorter commands like "rebuild"
 
-[] 2. Add functionality for adding tanks
+[X] 2. Add functionality for adding tanks
     Form for adding tanks:
     - Tank name: string
     - Size: Input as numbers that go H x W x D and is optional

@@ -1,16 +1,22 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import Modal from '../assets/modal'
-import { AddIcon } from '../assets/icons'
 import { createTank } from '../assets/api'
 import type { WaterType } from '../assets/types'
 
-type AddTankCardProps = {
+type AddTankModalProps = {
+  open: boolean
+  onClose: () => void
   onTankAdded?: () => void
 }
 
 const TEMP_MIN = 10
 const TEMP_MAX = 35
+
+const waterTypeOptions: { value: WaterType; label: string; emoji: string; description: string }[] = [
+  { value: 'freshwater', label: 'Freshwater', emoji: '🐟', description: 'Rivers, lakes & planted tanks' },
+  { value: 'saltwater', label: 'Saltwater', emoji: '🪸', description: 'Reef & marine setups' },
+]
 
 const emptyForm = {
   name: '',
@@ -18,26 +24,33 @@ const emptyForm = {
   width: '',
   depth: '',
   literCapacity: '',
-  waterType: 'freshwater' as WaterType,
+  waterType: '' as WaterType | '',
   tempMin: 22,
   tempMax: 26,
   planted: false,
 }
 
-const AddTankCard = ({ onTankAdded }: AddTankCardProps) => {
-  const [isOpen, setIsOpen] = useState(false)
+const AddTankModal = ({ open, onClose, onTankAdded }: AddTankModalProps) => {
+  const [step, setStep] = useState<1 | 2>(1)
   const [form, setForm] = useState(emptyForm)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleClose = () => {
-    setIsOpen(false)
+    onClose()
+    setStep(1)
     setForm(emptyForm)
     setError(null)
   }
 
+  const handleSelectWaterType = (waterType: WaterType) => {
+    setForm({ ...form, waterType })
+    setStep(2)
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    if (!form.waterType) return
     setSubmitting(true)
     setError(null)
 
@@ -64,18 +77,54 @@ const AddTankCard = ({ onTankAdded }: AddTankCardProps) => {
   }
 
   return (
-    <>
-      <button onClick={() => setIsOpen(true)}
-        className="p-2 flex items-center justify-center rounded bg-blue-200">
-        <AddIcon size={24} className="" />
-      </button>
+    <Modal open={open} onClose={handleClose}>
+      {step === 1 ? (
+        <div className="flex flex-col gap-6">
+          <div>
+            <h3 className="text-lg font-bold text-slate-800">Create your tank</h3>
+            <p className="mt-1 text-sm text-slate-500">What kind of tank are you setting up?</p>
+          </div>
 
-      <Modal open={isOpen} onClose={handleClose}>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {waterTypeOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => handleSelectWaterType(option.value)}
+                className="flex flex-col items-start gap-1 rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-orange-300 hover:bg-orange-50/40 focus:outline-none focus:ring-2 focus:ring-orange-200"
+              >
+                <span className="text-2xl" aria-hidden="true">{option.emoji}</span>
+                <span className="font-semibold text-slate-800">{option.label}</span>
+                <span className="text-xs text-slate-500">{option.description}</span>
+              </button>
+            ))}
+          </div>
+
+          <button type="button" className="action-btn bg-slate-100 text-slate-600 hover:bg-slate-200" onClick={handleClose}>
+            Cancel
+          </button>
+        </div>
+      ) : (
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <div>
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="text-xs font-medium text-slate-400 hover:text-slate-600"
+            >
+              ← Back
+            </button>
+            <h3 className="mt-1 text-lg font-bold text-slate-800">Tank details</h3>
+            <p className="mt-1 text-sm text-slate-500">
+              {form.waterType === 'freshwater' ? 'Freshwater' : 'Saltwater'} tank
+            </p>
+          </div>
+
           <div className="form-item">
-            <label className="form-label" htmlFor="tankName">Name your tank:</label>
+            <label className="form-label" htmlFor="tankName">Name your tank</label>
             <input
               className="form-input" type="text" id="tankName" name="tankName"
+              placeholder="e.g. Community Tank"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
@@ -83,7 +132,18 @@ const AddTankCard = ({ onTankAdded }: AddTankCardProps) => {
           </div>
 
           <div className="form-item">
-            <label className="form-label">Size (H x W x D, cm) — optional:</label>
+            <label className="form-label" htmlFor="literCapacity">Volume (liters)</label>
+            <input
+              className="form-input" type="number" id="literCapacity" name="literCapacity"
+              min="0"
+              value={form.literCapacity}
+              onChange={(e) => setForm({ ...form, literCapacity: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="form-item">
+            <label className="form-label">Dimensions (H × W × D, cm) — optional</label>
             <div className="flex gap-2">
               <input
                 className="form-input" type="number" min="0" placeholder="H"
@@ -101,29 +161,6 @@ const AddTankCard = ({ onTankAdded }: AddTankCardProps) => {
                 onChange={(e) => setForm({ ...form, depth: e.target.value })}
               />
             </div>
-          </div>
-
-          <div className="form-item">
-            <label className="form-label" htmlFor="literCapacity">Liter capacity:</label>
-            <input
-              className="form-input" type="number" id="literCapacity" name="literCapacity"
-              min="0"
-              value={form.literCapacity}
-              onChange={(e) => setForm({ ...form, literCapacity: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="form-item">
-            <label className="form-label" htmlFor="waterType">Water type:</label>
-            <select
-              className="form-input" id="waterType" name="waterType"
-              value={form.waterType}
-              onChange={(e) => setForm({ ...form, waterType: e.target.value as WaterType })}
-            >
-              <option value="freshwater">Freshwater</option>
-              <option value="saltwater">Saltwater</option>
-            </select>
           </div>
 
           <div className="form-item">
@@ -171,18 +208,18 @@ const AddTankCard = ({ onTankAdded }: AddTankCardProps) => {
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <div className="flex gap-2 mt-4">
-            <button type="button" className="action-btn bg-gray-500 text-white" onClick={handleClose}>
+          <div className="flex gap-2 mt-2">
+            <button type="button" className="action-btn bg-slate-100 text-slate-600 hover:bg-slate-200" onClick={handleClose}>
               Cancel
             </button>
-            <button className="action-btn bg-blue-500 text-white" type="submit" disabled={submitting}>
+            <button className="action-btn bg-orange-500 text-white hover:bg-orange-600" type="submit" disabled={submitting}>
               {submitting ? 'Adding…' : '+ Add Tank'}
             </button>
           </div>
         </form>
-      </Modal>
-    </>
+      )}
+    </Modal>
   )
 }
 
-export default AddTankCard
+export default AddTankModal

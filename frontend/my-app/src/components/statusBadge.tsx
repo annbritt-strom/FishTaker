@@ -1,30 +1,32 @@
 import type { MaintenanceStatus } from '../assets/types'
 
 const statusConfig = {
-    overdue: { 
+    overdue: {
         label: "Overdue",
-        className: "bg-red-500", 
+        dotClassName: "bg-red-500",
+        textClassName: "text-red-600",
     },
-    due_soon: { 
-        label: "Due Soon",
-        className: "bg-yellow-500" 
+    due_soon: {
+        label: "Due soon",
+        dotClassName: "bg-amber-500",
+        textClassName: "text-amber-600",
     },
-    on_track: { 
-        label: "On Track",
-        className: "bg-green-500" 
+    on_track: {
+        label: "On track",
+        dotClassName: "bg-emerald-500",
+        textClassName: "text-emerald-600",
     }
 }
 
-const StatusBadge = ({status}: {status: MaintenanceStatus}) => {
-    const { label, className } = statusConfig[status]
+const StatusBadge = ({ status }: { status: MaintenanceStatus }) => {
+    const { label, dotClassName, textClassName } = statusConfig[status]
 
     return (
-    <div>
-      <span className={`${className} text-white px-2 py-1 rounded`}>
+      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${textClassName}`}>
+        <span className={`h-1.5 w-1.5 rounded-full ${dotClassName}`} />
         {label}
       </span>
-    </div>
-  )
+    )
 }
 
 export default StatusBadge

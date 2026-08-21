@@ -1,57 +1,102 @@
-import type { MaintenanceStatusEntry, Tank } from '../assets/types'
-import StatusBadge from './statusBadge'
+import type { MaintenanceStatus, MaintenanceStatusEntry, Tank } from '../assets/types'
+import StatusBadge from './StatusBadge'
 
 type TankCardProps = {
     tank: Tank,
     statuses?: MaintenanceStatusEntry[]
 }
 
+const statusPriority: Record<MaintenanceStatus, number> = {
+  overdue: 0,
+  due_soon: 1,
+  on_track: 2,
+}
+
+const overallStatus = (statuses: MaintenanceStatusEntry[]) => {
+  if (statuses.length === 0) {
+    return { label: 'No tasks yet', dotClassName: 'bg-slate-300' }
+  }
+  if (statuses.some((entry) => entry.status === 'overdue')) {
+    return { label: 'Needs attention', dotClassName: 'bg-red-500' }
+  }
+  if (statuses.some((entry) => entry.status === 'due_soon')) {
+    return { label: 'Due soon', dotClassName: 'bg-amber-500' }
+  }
+  return { label: 'Good', dotClassName: 'bg-emerald-500' }
+}
+
+const nextMaintenance = (statuses: MaintenanceStatusEntry[]) => {
+  if (statuses.length === 0) return null
+  return [...statuses].sort((a, b) => statusPriority[a.status] - statusPriority[b.status])[0]
+}
+
+const waterVisualClass: Record<Tank['water_type'], string> = {
+  freshwater: 'from-sky-200 via-sky-100 to-sky-50',
+  saltwater: 'from-cyan-200 via-teal-100 to-sky-50',
+}
+
 const TankCard = ({ tank, statuses = [] }: TankCardProps) => {
   const hasTempRange = tank.temp_min != null || tank.temp_max != null
+  const fishCount = (tank.inhabitants ?? []).reduce((sum, inhabitant) => sum + inhabitant.amount, 0)
+  const status = overallStatus(statuses)
+  const nextTask = nextMaintenance(statuses)
 
   return (
-    <div className='bg-blue-100 p-4 rounded-lg shadow-md'>
-        <div className='flex items-center gap-2'>  
-            <h2 className='text-xl font-semibold'>{tank.name}</h2>
+    <div className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+      {/* aquarium visual */}
+      <div className={`relative h-28 bg-gradient-to-b ${waterVisualClass[tank.water_type]} overflow-hidden`}>
+        <div className="absolute inset-x-0 top-3 flex justify-center opacity-70">
+          <svg viewBox="0 0 200 20" className="h-4 w-3/4" fill="none">
+            <path d="M0 10 Q17 4 34 10 T68 10 T102 10 T136 10 T170 10 T200 10" stroke="white" strokeWidth="2" strokeLinecap="round" />
+          </svg>
         </div>
+        <span className="absolute right-3 top-3 rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 backdrop-blur-sm">
+          {tank.water_type === 'freshwater' ? 'Freshwater' : 'Saltwater'}
+        </span>
+        <svg viewBox="0 0 32 16" className="absolute bottom-4 left-8 h-4 w-8 fill-orange-400/90">
+          <path d="M0 8s8-7 16-2c-8 7-16 2-16 2" />
+        </svg>
+        <svg viewBox="0 0 32 16" className="absolute bottom-6 right-12 h-3 w-6 fill-white/70">
+          <path d="M0 8s8-7 16-2c-8 7-16 2-16 2" />
+        </svg>
+      </div>
 
-      {statuses.length > 0 && (
-        <div className='mt-2 flex flex-wrap gap-2'>
-          {statuses.map((entry) => (
-            <div key={entry.task_id} className='flex items-center gap-1 text-sm'>
-              <span>{entry.task_type}:</span>
-              <StatusBadge status={entry.status} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      <dl className='mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-700'>
-        <div>
-          <dt className='inline font-medium'>Size: </dt>
-          <dd className='inline'>{tank.size}</dd>
-        </div>
-        <div>
-          <dt className='inline font-medium'>Capacity: </dt>
-          <dd className='inline'>{tank.liter_capacity} L</dd>
-        </div>
-        <div>
-          <dt className='inline font-medium'>Water: </dt>
-          <dd className='inline capitalize'>{tank.water_type}</dd>
-        </div>
-        {hasTempRange && (
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2">
           <div>
-            <dt className='inline font-medium'>Temp: </dt>
-            <dd className='inline'>
-              {tank.temp_min ?? "?"}–{tank.temp_max ?? "?"}°C
-            </dd>
+            <h3 className="text-base font-bold text-slate-800">{tank.name}</h3>
+            <p className="text-xs text-slate-500">
+              {tank.liter_capacity} L · {tank.water_type === 'freshwater' ? 'Freshwater' : 'Saltwater'}
+            </p>
           </div>
-        )}
-        <div>
-          <dt className='inline font-medium'>Planted: </dt>
-          <dd className='inline'>{tank.planted ? "Yes" : "No"}</dd>
+          <span className="flex items-center gap-1.5 whitespace-nowrap text-xs font-semibold text-slate-600">
+            <span className={`h-2 w-2 rounded-full ${status.dotClassName}`} />
+            {status.label}
+          </span>
         </div>
-      </dl>
+
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
+          <span className="inline-flex items-center gap-1">🐟 {fishCount} Fish</span>
+          {hasTempRange && (
+            <span className="inline-flex items-center gap-1">
+              🌡 {tank.temp_min ?? '?'}–{tank.temp_max ?? '?'}°C
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1">🌱 {tank.planted ? 'Planted' : 'Unplanted'}</span>
+        </div>
+
+        <div className="mt-4 border-t border-slate-100 pt-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Next maintenance</p>
+          {nextTask ? (
+            <div className="mt-1 flex items-center justify-between">
+              <span className="text-sm capitalize text-slate-700">{nextTask.task_type}</span>
+              <StatusBadge status={nextTask.status} />
+            </div>
+          ) : (
+            <p className="mt-1 text-sm text-slate-400">Nothing scheduled</p>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

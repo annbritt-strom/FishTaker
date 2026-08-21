@@ -1,5 +1,15 @@
 export type WaterType = "freshwater" | "saltwater";
 
+export type Inhabitant = {
+    id: number
+    common_name: string
+    family_name?: string | null
+    temp_min: number
+    schooling: boolean
+    amount: number
+    tank_level?: string | null
+}
+
 export type Tank = {
     id: number
     name: string
@@ -9,6 +19,7 @@ export type Tank = {
     temp_min?: number | null
     temp_max?: number | null
     planted: boolean
+    inhabitants?: Inhabitant[]
 }
 
 export type TankCreate = {

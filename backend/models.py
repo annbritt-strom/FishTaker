@@ -31,7 +31,19 @@ class TankCreate(BaseModel):
     temp_min: Optional[float] = None
     temp_max: Optional[float] = None
     planted: bool
+    image: Optional[str] = None  # data URL, e.g. "data:image/jpeg;base64,..."
     inhabitants: list[InhabitantCreate] = []
+
+
+class TankUpdate(BaseModel):
+    name: str
+    size: str | None = None
+    liter_capacity: float
+    water_type: WaterType
+    temp_min: Optional[float] = None
+    temp_max: Optional[float] = None
+    planted: bool
+    image: Optional[str] = None
 
 
 class Tank(BaseModel):
@@ -45,6 +57,7 @@ class Tank(BaseModel):
     temp_min: Optional[float] = None
     temp_max: Optional[float] = None
     planted: bool
+    image: Optional[str] = None
     inhabitants: list[Inhabitant] = []
 
 

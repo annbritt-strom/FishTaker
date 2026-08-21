@@ -24,7 +24,7 @@ function App() {
   return (
     <div className='min-h-screen bg-slate-50'>
       <Header />
-      <TanksSection tanks={tanks} statuses={status} onTankAdded={refreshTanks} />
+      <TanksSection tanks={tanks} statuses={status} onTanksChanged={refreshTanks} />
     </div>
   )
 }

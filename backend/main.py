@@ -2,11 +2,12 @@ from datetime import date, datetime
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
 from database import Base, engine, get_db
 from db_models import InhabitantORM, MaintenanceTaskORM, TankORM
-from models import MaintenanceTask, Tank, TankCreate
+from models import MaintenanceTask, Tank, TankCreate, TankUpdate
 
 app = FastAPI(title="Fishtaker API")
 
@@ -22,6 +23,12 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+
+    # Additive migration: add columns introduced after the db file was first created.
+    existing_columns = {col["name"] for col in inspect(engine).get_columns("tanks")}
+    if "image" not in existing_columns:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE tanks ADD COLUMN image TEXT"))
 
 
 @app.get("/")
@@ -52,11 +59,32 @@ def create_tank(tank: TankCreate, db: Session = Depends(get_db)):
         temp_min=tank.temp_min,
         temp_max=tank.temp_max,
         planted=tank.planted,
+        image=tank.image,
         inhabitants=[
             InhabitantORM(**inhabitant.model_dump()) for inhabitant in tank.inhabitants
         ],
     )
     db.add(tank_row)
+    db.commit()
+    db.refresh(tank_row)
+    return tank_row
+
+
+@app.put("/tanks/{tank_id}", response_model=Tank)
+def update_tank(tank_id: int, tank: TankUpdate, db: Session = Depends(get_db)):
+    tank_row = db.get(TankORM, tank_id)
+    if tank_row is None:
+        raise HTTPException(status_code=404, detail="Tank not found")
+
+    tank_row.name = tank.name
+    tank_row.size = tank.size
+    tank_row.liter_capacity = tank.liter_capacity
+    tank_row.water_type = tank.water_type
+    tank_row.temp_min = tank.temp_min
+    tank_row.temp_max = tank.temp_max
+    tank_row.planted = tank.planted
+    tank_row.image = tank.image
+
     db.commit()
     db.refresh(tank_row)
     return tank_row

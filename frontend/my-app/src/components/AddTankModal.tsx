@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import Modal from '../assets/modal'
+import { CameraIcon, XIcon } from '../assets/icons'
 import { createTank } from '../assets/api'
+import { fileToResizedDataUrl } from '../assets/imageUtils'
 import type { WaterType } from '../assets/types'
 
 type AddTankModalProps = {
@@ -28,6 +30,7 @@ const emptyForm = {
   tempMin: 22,
   tempMax: 26,
   planted: false,
+  image: null as string | null,
 }
 
 const AddTankModal = ({ open, onClose, onTankAdded }: AddTankModalProps) => {
@@ -35,6 +38,20 @@ const AddTankModal = ({ open, onClose, onTankAdded }: AddTankModalProps) => {
   const [form, setForm] = useState(emptyForm)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const dataUrl = await fileToResizedDataUrl(file)
+      setForm((prev) => ({ ...prev, image: dataUrl }))
+    } catch {
+      setError('Could not load that image. Try a different file.')
+    } finally {
+      e.target.value = ''
+    }
+  }
 
   const handleClose = () => {
     onClose()
@@ -66,6 +83,7 @@ const AddTankModal = ({ open, onClose, onTankAdded }: AddTankModalProps) => {
         temp_min: form.tempMin,
         temp_max: form.tempMax,
         planted: form.planted,
+        image: form.image,
       })
       onTankAdded?.()
       handleClose()
@@ -118,6 +136,44 @@ const AddTankModal = ({ open, onClose, onTankAdded }: AddTankModalProps) => {
             <p className="mt-1 text-sm text-slate-500">
               {form.waterType === 'freshwater' ? 'Freshwater' : 'Saltwater'} tank
             </p>
+          </div>
+
+          <div className="form-item">
+            <label className="form-label">Tank photo — optional</label>
+            <div className="flex items-center gap-3">
+              <div className="relative h-16 w-24 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                {form.image ? (
+                  <img src={form.image} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
+                    <CameraIcon size={20} />
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                {form.image ? 'Replace photo' : 'Upload photo'}
+              </button>
+              {form.image && (
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, image: null })}
+                  className="flex items-center gap-1 text-xs font-medium text-slate-400 hover:text-red-500"
+                >
+                  <XIcon size={14} /> Remove
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoChange}
+              />
+            </div>
           </div>
 
           <div className="form-item">

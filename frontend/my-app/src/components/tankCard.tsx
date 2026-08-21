@@ -1,9 +1,11 @@
 import type { MaintenanceStatus, MaintenanceStatusEntry, Tank } from '../assets/types'
+import { EditIcon } from '../assets/icons'
 import StatusBadge from './StatusBadge'
 
 type TankCardProps = {
     tank: Tank,
     statuses?: MaintenanceStatusEntry[]
+    onEdit?: () => void
 }
 
 const statusPriority: Record<MaintenanceStatus, number> = {
@@ -35,7 +37,7 @@ const waterVisualClass: Record<Tank['water_type'], string> = {
   saltwater: 'from-cyan-200 via-teal-100 to-sky-50',
 }
 
-const TankCard = ({ tank, statuses = [] }: TankCardProps) => {
+const TankCard = ({ tank, statuses = [], onEdit }: TankCardProps) => {
   const hasTempRange = tank.temp_min != null || tank.temp_max != null
   const fishCount = (tank.inhabitants ?? []).reduce((sum, inhabitant) => sum + inhabitant.amount, 0)
   const status = overallStatus(statuses)
@@ -44,21 +46,36 @@ const TankCard = ({ tank, statuses = [] }: TankCardProps) => {
   return (
     <div className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
       {/* aquarium visual */}
-      <div className={`relative h-28 bg-gradient-to-b ${waterVisualClass[tank.water_type]} overflow-hidden`}>
-        <div className="absolute inset-x-0 top-3 flex justify-center opacity-70">
-          <svg viewBox="0 0 200 20" className="h-4 w-3/4" fill="none">
-            <path d="M0 10 Q17 4 34 10 T68 10 T102 10 T136 10 T170 10 T200 10" stroke="white" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </div>
+      <div className={`relative h-28 overflow-hidden ${tank.image ? '' : `bg-gradient-to-b ${waterVisualClass[tank.water_type]}`}`}>
+        {tank.image ? (
+          <img src={tank.image} alt={tank.name} className="h-full w-full object-cover" />
+        ) : (
+          <>
+            <div className="absolute inset-x-0 top-3 flex justify-center opacity-70">
+              <svg viewBox="0 0 200 20" className="h-4 w-3/4" fill="none">
+                <path d="M0 10 Q17 4 34 10 T68 10 T102 10 T136 10 T170 10 T200 10" stroke="white" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
+            <svg viewBox="0 0 32 16" className="absolute bottom-4 left-8 h-4 w-8 fill-orange-400/90">
+              <path d="M0 8s8-7 16-2c-8 7-16 2-16 2" />
+            </svg>
+            <svg viewBox="0 0 32 16" className="absolute bottom-6 right-12 h-3 w-6 fill-white/70">
+              <path d="M0 8s8-7 16-2c-8 7-16 2-16 2" />
+            </svg>
+          </>
+        )}
         <span className="absolute right-3 top-3 rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 backdrop-blur-sm">
           {tank.water_type === 'freshwater' ? 'Freshwater' : 'Saltwater'}
         </span>
-        <svg viewBox="0 0 32 16" className="absolute bottom-4 left-8 h-4 w-8 fill-orange-400/90">
-          <path d="M0 8s8-7 16-2c-8 7-16 2-16 2" />
-        </svg>
-        <svg viewBox="0 0 32 16" className="absolute bottom-6 right-12 h-3 w-6 fill-white/70">
-          <path d="M0 8s8-7 16-2c-8 7-16 2-16 2" />
-        </svg>
+        {onEdit && (
+          <button
+            onClick={onEdit}
+            aria-label="Edit tank"
+            className="absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-slate-600 opacity-0 backdrop-blur-sm transition-opacity hover:bg-white group-hover:opacity-100"
+          >
+            <EditIcon size={14} />
+          </button>
+        )}
       </div>
 
       <div className="p-4">

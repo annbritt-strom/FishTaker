@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -15,6 +15,7 @@ class TankORM(Base):
     temp_min = Column(Float, nullable=True)
     temp_max = Column(Float, nullable=True)
     planted = Column(Boolean, nullable=False)
+    image = Column(Text, nullable=True)
 
     inhabitants = relationship("InhabitantORM", back_populates="tank", cascade="all, delete-orphan")
     maintenance_tasks = relationship("MaintenanceTaskORM", back_populates="tank", cascade="all, delete-orphan")
